@@ -1,0 +1,136 @@
+.jazz_jobs_wrapper div:first-child {
+    margin-bottom: unset;
+}
+
+.job-filters,
+.filter-row {
+    display: flex;
+    width: 100%;
+}
+
+.filter-row .col-4 {
+    width: 31.33%;
+    margin-right: 3%;
+}
+
+.filter-row .col-4:last-child {
+    margin-right: 0;
+}
+
+.job-listings li {
+    margin: 0;
+    padding: 0.75rem 0;
+    list-style-type: none;
+    text-align: left;
+    /* border-bottom: 1px dotted rgba(128,128,128, 0.25); */
+}
+
+select {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.job-listings li:last-child {
+    /* border-bottom: none; */
+    padding: 1.5rem 0;
+}
+
+select.filter {
+    margin-bottom: 1rem;
+    padding: 0.25rem;
+}
+
+.filter-results {
+    text-align: left;
+}
+
+.filter-results .no-results-message.hidden {
+    display: none;
+}
+
+.filter-results .no-results-message {
+    text-align: center;
+    margin-top: 2.4rem;
+}
+
+.no-results-message p {
+    font-size: 1.14285rem;
+    font-weight: normal;
+}
+
+.no-results-message p.sub-title {
+    font-weight: bold;
+    font-size: 1.714285rem; /* 24px */
+    line-height: 2.85714rem; /* 40px */
+}
+
+.posting-category {
+    text-transform: uppercase;
+    display: block;
+    color: #808080;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.posting-category em {
+    margin-right: 0.5rem;
+}
+
+.posting-apply {
+    margin-top: 5px;
+}
+
+.posting-apply .apply-button {
+    background: rgb(234, 80, 49);
+    border-color: rgb(234, 80, 49);
+    padding: 10px 20px;
+    color: #fff;
+    border-radius: 4px;
+}
+
+.posting {
+    clear: both;
+    padding-bottom: 20px;
+}
+ul.job-listings {
+    margin: 0;
+    padding: 0;
+}
+
+.job-listings li {
+    display: flex;
+}
+
+.job-listings li .posting {
+    flex: 1;
+}
+
+.job-listings li h4,
+.job-listings li h4 {
+    font-size: 1.5rem;
+    line-height: 1.6rem;
+
+    -webkit-transition: color 150ms;
+    -moz-transition: color 150ms;
+    -o-transition: color 150ms;
+    -ms-transition: color 150ms;
+    transition: color 150ms;
+}
+
+@media screen and (max-width: 750px) {
+    .job-filters,
+    .filter-row {
+        display: flex;
+        width: 100%;
+        flex-direction: column;
+    }
+    .filter-row .col-4 {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    .filter-row .col-4:last-child {
+        margin-right: 0;
+    }
+}
