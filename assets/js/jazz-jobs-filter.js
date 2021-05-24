@@ -62,7 +62,7 @@ class FilterDropdowns {
                 job.style.display = "none";
                 visibleJobs -= 1;
             } else if (job.dataset.show == "true") {
-                job.style.display = "block";
+                job.style.display = "flex";
             }
         });
 
@@ -85,7 +85,7 @@ class FilterDropdowns {
                 }
             });
             if (showHeading) {
-                section.style.display = "block";
+                section.style.display = "flex";
             } else {
                 section.style.display = "none";
             }

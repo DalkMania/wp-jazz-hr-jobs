@@ -31,11 +31,6 @@ select {
     appearance: none;
 }
 
-.job-listings li:last-child {
-    /* border-bottom: none; */
-    padding: 1.5rem 0;
-}
-
 select.filter {
     margin-bottom: 1rem;
     padding: 0.25rem;
@@ -96,6 +91,7 @@ select.filter {
 ul.job-listings {
     margin: 0;
     padding: 0;
+    width: 100%;
 }
 
 .job-listings li {
