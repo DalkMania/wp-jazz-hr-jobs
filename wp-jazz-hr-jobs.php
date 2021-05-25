@@ -432,9 +432,9 @@ if (! class_exists("JazzHRJobs")) {
         {
             // Get any existing copy of our transient data
             if (false === ($jazz_data = get_transient('jazz_positions'))) {
-                // It wasn't there, so regenerate the data and save the transient for 12 hours
+                // It wasn't there, so regenerate the data and save the transient for 1 hour
                 $jazz_data = serialize($positions);
-                set_transient('jazz_positions', $jazz_data, 12 * HOUR_IN_SECONDS);
+                set_transient('jazz_positions', $jazz_data, 1 * HOUR_IN_SECONDS);
             }
         }
 
