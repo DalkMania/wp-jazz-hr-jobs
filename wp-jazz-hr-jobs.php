@@ -5,7 +5,7 @@ Description: Jazz HR is an online software that helps companies post jobs online
 Plugin URI: http://www.niklasdahlqvist.com
 Author: Niklas Dahlqvist
 Author URI: http://www.niklasdahlqvist.com
-Version: 1.0.0
+Version: 1.0.1
 Requires at least: 4.8.3
 License: GPL
 */
@@ -43,6 +43,7 @@ if (! class_exists("JazzHRJobs")) {
         {
             $this->options = get_option('jazz_hr_settings');
             $this->api_key = $this->options['api_key'];
+            $this->subdomain = 'https://' . $this->options['subdomain'] .'.applytojob.com';
             $this->apiBaseUrl = 'https://api.resumatorapi.com/v1/';
 
             add_action('admin_menu', array( $this, 'add_plugin_page' ));
@@ -151,6 +152,14 @@ if (! class_exists("JazzHRJobs")) {
             );
 
             add_settings_field(
+                'subdomain', // ID
+          'Jazz HR Subdomain', // Title
+          array( $this, 'jazz_hr_subdomain_callback' ), // Callback
+          'jazz_hr-settings-admin', // Page
+          'jazz_hr_section' // Section
+            );
+
+            add_settings_field(
                 'api_key', // ID
           'Jazz HR API Key', // Title
           array( $this, 'jazz_hr_api_key_callback' ), // Callback
@@ -169,6 +178,10 @@ if (! class_exists("JazzHRJobs")) {
             $new_input = array();
             if (isset($input['api_key'])) {
                 $new_input['api_key'] = sanitize_text_field($input['api_key']);
+            }
+
+            if (isset($input['subdomain'])) {
+                $new_input['subdomain'] = sanitize_text_field($input['subdomain']);
             }
 
             return $new_input;
@@ -194,10 +207,18 @@ if (! class_exists("JazzHRJobs")) {
             );
         }
 
+        public function jazz_hr_subdomain_callback()
+        {
+            printf(
+                '<small>https://</small><input type="text" id="subdomain" class="narrow-fat" name="jazz_hr_settings[subdomain]" value="%s" /><small>.applytojob.com</small>',
+                isset($this->options['subdomain']) ? esc_attr($this->options['subdomain']) : ''
+            );
+        }
+
         public function JobsShortCode($atts, $content = null)
         {
             global $post;
-            if (isset($this->api_key) && $this->api_key != '') {
+            if ((isset($this->api_key) && $this->api_key != '' && (isset($this->subdomain) && $this->subdomain != ''))) {
                 $output = '';
                 $positions = $this->get_jazz_positions();
 
@@ -335,7 +356,7 @@ if (! class_exists("JazzHRJobs")) {
                             'department' => $item->department,
                             'team' => $item->team_id,
                             'description' => preg_replace('#(<[a-z ]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $item->description),
-                            'applyUrl' => 'https://madmobileinc.applytojob.com/apply/jobs/details/' . $item->board_code,
+                            'applyUrl' => $this->subdomain . '/apply/jobs/details/' . $item->board_code,
                             'createdAt' => strtotime($item->original_open_date)
                         ];
 
@@ -350,7 +371,7 @@ if (! class_exists("JazzHRJobs")) {
                         'department' => $positions->department,
                         'team' => $positions->team_id,
                         'description' => preg_replace('#(<[a-z ]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $positions->description),
-                        'applyUrl' => 'https://madmobileinc.applytojob.com/apply/jobs/details/' . $positions->board_code,
+                        'applyUrl' => $this->subdomain .'/apply/jobs/details/' . $positions->board_code,
                         'createdAt' => strtotime($positions->original_open_date)
                     ];
 
@@ -432,9 +453,9 @@ if (! class_exists("JazzHRJobs")) {
         {
             // Get any existing copy of our transient data
             if (false === ($jazz_data = get_transient('jazz_positions'))) {
-                // It wasn't there, so regenerate the data and save the transient for 1 hour
+                // It wasn't there, so regenerate the data and save the transient for 1 hours
                 $jazz_data = serialize($positions);
-                set_transient('jazz_positions', $jazz_data, 1 * HOUR_IN_SECONDS);
+                set_transient('jazz_positions', $jazz_data, 11 * HOUR_IN_SECONDS);
             }
         }
 
