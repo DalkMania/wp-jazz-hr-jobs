@@ -44,6 +44,7 @@ if (! class_exists("JazzHRJobs")) {
             $this->options = get_option('jazz_hr_settings');
             $this->api_key = $this->options['api_key'];
             $this->subdomain = 'https://' . $this->options['subdomain'] .'.applytojob.com';
+            $this->job_url = $this->options['url_select'];
             $this->apiBaseUrl = 'https://api.resumatorapi.com/v1/';
 
             add_action('admin_menu', array( $this, 'add_plugin_page' ));
@@ -123,8 +124,8 @@ if (! class_exists("JazzHRJobs")) {
           <h2>Jazz HR Settings</h2>
           <form method="post" action="options.php">
           <?php
-              // This prints out all hidden setting fields
-              settings_fields('jazz_hr_settings_group');
+            // This prints out all hidden setting fields
+            settings_fields('jazz_hr_settings_group');
             do_settings_sections('jazz_hr-settings-admin');
             submit_button();
             submit_button('Clear Cache', 'delete', 'clear_cache', false); ?>
@@ -166,6 +167,14 @@ if (! class_exists("JazzHRJobs")) {
           'jazz_hr-settings-admin', // Page
           'jazz_hr_section' // Section
             );
+
+            add_settings_field(
+                'url_select', // ID
+          'Jazz HR Job Posting URL', // Title
+          array( $this, 'jazz_hr_url_select_callback' ), // Callback
+          'jazz_hr-settings-admin', // Page
+          'jazz_hr_section' // Section
+            );
         }
 
         /**
@@ -182,6 +191,10 @@ if (! class_exists("JazzHRJobs")) {
 
             if (isset($input['subdomain'])) {
                 $new_input['subdomain'] = sanitize_text_field($input['subdomain']);
+            }
+
+            if (isset($input['url_select'])) {
+                $new_input['url_select'] = sanitize_text_field($input['url_select']);
             }
 
             return $new_input;
@@ -213,6 +226,16 @@ if (! class_exists("JazzHRJobs")) {
                 '<small>https://</small><input type="text" id="subdomain" class="narrow-fat" name="jazz_hr_settings[subdomain]" value="%s" /><small>.applytojob.com</small>',
                 isset($this->options['subdomain']) ? esc_attr($this->options['subdomain']) : ''
             );
+        }
+
+        public function jazz_hr_url_select_callback()
+        {
+        ?>
+            <select id="url_select" name="jazz_hr_settings[url_select]">
+                <option value="default" <?php selected($this->options['url_select'], "default"); ?>>Jazz HR Job Details Page</option>
+                <option value="custom" <?php selected($this->options['url_select'], "custom"); ?>>Jazz HR Custom Job Page</option>
+            </select>
+        <?php
         }
 
         public function JobsShortCode($atts, $content = null)
@@ -356,7 +379,7 @@ if (! class_exists("JazzHRJobs")) {
                             'department' => $item->department,
                             'team' => $item->team_id,
                             'description' => preg_replace('#(<[a-z ]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $item->description),
-                            'applyUrl' => $this->subdomain . '/apply/jobs/details/' . $item->board_code,
+                            'applyUrl' => $this->generateApplyUrl($item),
                             'createdAt' => strtotime($item->original_open_date)
                         ];
 
@@ -371,7 +394,7 @@ if (! class_exists("JazzHRJobs")) {
                         'department' => $positions->department,
                         'team' => $positions->team_id,
                         'description' => preg_replace('#(<[a-z ]*)(style=("|\')(.*?)("|\'))([a-z ]*>)#', '\\1\\6', $positions->description),
-                        'applyUrl' => $this->subdomain .'/apply/jobs/details/' . $positions->board_code,
+                        'applyUrl' => $this->generateApplyUrl($positions),
                         'createdAt' => strtotime($positions->original_open_date)
                     ];
 
@@ -447,6 +470,14 @@ if (! class_exists("JazzHRJobs")) {
             sort($depts);
 
             return $depts;
+        }
+
+        public function generateApplyUrl($position) {
+            if($this->job_url == 'custom') {
+                return $this->subdomain . '/apply/' . $position->board_code . '/' . sanitize_title($position->title);
+            } else {
+                return $this->subdomain . '/apply/jobs/details/' . $position->board_code;
+            }
         }
 
         public function storeJazzPostions($positions)
