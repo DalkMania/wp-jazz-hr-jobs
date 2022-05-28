@@ -207,6 +207,8 @@ if (! class_exists("JazzHRJobs")) {
         {
             echo '<p>Enter your settings below:';
             echo '<br />and then use the <strong>[jazz_hr_job_listings]</strong> shortcode to display the content.</p>';
+            echo '<p>Use the <strong>[jazz_hr_job_listings sort_by=date sort_order=asc]</strong> shortcode to display the content ordered by created at date (Ascending). </p>';
+            echo '<p>Use the <strong>[jazz_hr_job_listings sort_by=date sort_order=desc]</strong> shortcode to display the content ordered by created at date (Descending). </p>';
         }
 
         /**
@@ -241,9 +243,16 @@ if (! class_exists("JazzHRJobs")) {
         public function JobsShortCode($atts, $content = null)
         {
             global $post;
+            $args = shortcode_atts(array(
+                'sort_by' => "title",
+                'sort_order' => 'asc'
+                ), $atts);
+               
+        
+            
             if ((isset($this->api_key) && $this->api_key != '' && (isset($this->subdomain) && $this->subdomain != ''))) {
                 $output = '';
-                $positions = $this->get_jazz_positions();
+                $positions = $this->get_jazz_positions($args["sort_by"], $args["sort_order"]);
 
                 $output .= "
                     <div class='job-filters'>
@@ -360,7 +369,7 @@ if (! class_exists("JazzHRJobs")) {
             return $response;
         }
 
-        public function get_jazz_positions()
+        public function get_jazz_positions($sortBy = "title", $sortOrder = "asc")
         {
             // Get any existing copy of our transient data
             if (false === ($jobs = get_transient('jazz_positions'))) {
@@ -401,12 +410,15 @@ if (! class_exists("JazzHRJobs")) {
                         array_push($jobs, $jazz_position);
                     }
 
+                    $jobs =  $this->sortJobs($jobs, $sortBy, $sortOrder);
+
                     // Cache the Response
                     $this->storeJazzPostions($jobs);
                 }
             } else {
                 // Get any existing copy of our transient data
                 $jobs = unserialize(get_transient('jazz_positions'));
+                $jobs =  $this->sortJobs($jobs, $sortBy, $sortOrder);
             }
             // Finally return the data
             return $jobs;
@@ -470,6 +482,39 @@ if (! class_exists("JazzHRJobs")) {
             sort($depts);
 
             return $depts;
+        }
+
+        public function sortJobs($jobs, $sortBy, $sortOrder) {
+            if($sortBy === "title" && $sortOrder === "asc") {
+                
+                usort($jobs, function($a, $b)
+                {
+                    return strtolower($a["title"]) > strtolower($b["title"]);
+                });
+            }
+
+            if($sortBy === "title" && $sortOrder === "desc") {
+                usort($jobs, function($a, $b)
+                {
+                    return strtolower($a["title"]) < strtolower($b["title"]);
+                });
+            }
+
+            if($sortBy === "date" && $sortOrder === "asc") {
+                usort($jobs, function($a, $b) {
+                    return strtotime($a["createdAt"]) - strtotime($b["createdAt"]);
+                });
+            }
+
+            if($sortBy === "date" && $sortOrder === "desc") {
+                usort($jobs, function($a, $b) {
+                    return strtotime($b["createdAt"]) - strtotime($a["createdAt"]);
+                });
+            }
+
+            return $jobs;
+
+            
         }
 
         public function generateApplyUrl($position) {
